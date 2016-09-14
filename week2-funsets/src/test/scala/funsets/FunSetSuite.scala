@@ -54,6 +54,17 @@ class FunSetSuite extends FunSuite {
     assert(contains(x => true, 100))
   }
 
+  def isOdd = (x: Int) => x % 2 == 1
+
+  test("contains: isOdd contains 1 is true") {
+    assert(contains(isOdd, 1))
+  }
+
+  test("contains: isOdd contains 0 is true") {
+    assert(! contains(isOdd, 0))
+  }
+
+
   /**
    * When writing tests, one would often like to re-use certain values for multiple
    * tests. For instance, we would like to create an Int-set and have multiple test
