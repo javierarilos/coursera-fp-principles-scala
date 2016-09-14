@@ -156,6 +156,22 @@ class FunSetSuite extends FunSuite {
     }
   }
 
+  test("forall Returns whether all bounded integers within `s` satisfy `p`.") {
+    new TestSets {
+      assert( ! forall(s1to10, isOdd))
+      assert(forall(isOdd, isOdd))
+      assert(forall(s1to10, s1to10))
+    }
+  }
+
+  test("exists Returns whether there exists a bounded integer within `s` that satisfies `p`.") {
+    new TestSets {
+      assert(exists(s1to10, isOdd))
+      assert(exists(isOdd, isOdd))
+      assert( ! exists(s1to10, singletonSet(67)))
+    }
+  }
+
 
 
 
