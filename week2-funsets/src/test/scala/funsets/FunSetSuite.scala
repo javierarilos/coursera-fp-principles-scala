@@ -145,6 +145,19 @@ class FunSetSuite extends FunSuite {
     }
   }
 
+  test("filter returns the subset of `s` for which `p` holds.") {
+    new TestSets {
+      val odds1to10 = filter(s1to10, isOdd)
+      assert(! contains(odds1to10, 2), "2 is filtered from 1 to 10 by isOdd")
+      assert(! contains(odds1to10, 8), "8 is filtered from 1 to 10 by isOdd")
+      assert(! contains(odds1to10, 11), "11 is filtered from 1 to 10 by isOdd")
+      assert(contains(odds1to10, 3), "3 is NOT filtered from 1 to 10 by isOdd")
+      assert(! contains(odds1to10, 12), "12 is filtered from 1 to 10 by isOdd")
+    }
+  }
+
+
+
 
 
 }
