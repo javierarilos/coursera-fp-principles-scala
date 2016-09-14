@@ -134,5 +134,17 @@ class FunSetSuite extends FunSuite {
     }
   }
 
+  test("diff contains elements in first set that are NOT in second set") {
+    new TestSets {
+      val evens1to10 = diff(s1to10, isOdd)
+      assert(contains(evens1to10, 2), "2 should belong to evens 1 to 10")
+      assert(contains(evens1to10, 8), "8 should belong to evens 1 to 10")
+      assert(! contains(evens1to10, 11), "11 should not belong to evens 1 to 10")
+      assert(! contains(evens1to10, 3), "3 should not belong to evens 1 to 10")
+      assert(! contains(evens1to10, 12), "12 should not belong to evens 1 to 10")
+    }
+  }
+
+
 
 }
