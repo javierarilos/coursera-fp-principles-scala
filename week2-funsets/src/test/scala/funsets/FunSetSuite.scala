@@ -88,6 +88,9 @@ class FunSetSuite extends FunSuite {
     val s1 = singletonSet(1)
     val s2 = singletonSet(2)
     val s3 = singletonSet(3)
+    val s1to10 = (x: Int) => x > 0 && x < 11
+    val isOdd = (x: Int) => x % 2 == 1
+
   }
 
   /**
@@ -118,6 +121,16 @@ class FunSetSuite extends FunSuite {
       assert(contains(s, 1), "Union 1")
       assert(contains(s, 2), "Union 2")
       assert(!contains(s, 3), "Union 3")
+    }
+  }
+
+  test("intersect contains elements in both sets") {
+    new TestSets {
+      val s = intersect(s1to10, isOdd)
+      assert(contains(s, 1), "1 should be an odd number between 1 and 10")
+      assert(contains(s, 1), "7 should be an odd number between 1 and 10")
+      assert(! contains(s, 6), "6 should NOT be an odd number between 1 and 10")
+      assert(! contains(s, 11), "11 should NOT be an odd number between 1 and 10")
     }
   }
 
