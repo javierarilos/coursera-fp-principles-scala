@@ -173,6 +173,22 @@ class FunSetSuite extends FunSuite {
   }
 
 
+  test("map Returns a set transformed by applying `f` to each element of `s`.") {
+    new TestSets {
+      val plusOne = (x: Int) => x + 1
+
+      val s2to11 = map(s1to10, plusOne)
+      assert(contains(s2to11, 2))
+      assert(contains(s2to11, 3))
+      assert(contains(s2to11, 11))
+      assert(! contains(s2to11, 1))
+      assert(! contains(s2to11, 12))
+      assert(! contains(s2to11, 128765))
+
+    }
+  }
+
+
 
 
 
