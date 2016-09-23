@@ -6,9 +6,12 @@ import TweetReader._
   * A class to represent tweets.
   */
 class Tweet(val user: String, val text: String, val retweets: Int) {
+
+  def morePopular(that: Tweet): Tweet = if (this.retweets >= that.retweets) this else that
+
   override def toString: String =
     "User: " + user + "\n" +
-      "Text: " + text + " [" + retweets + "]"
+      "Text: " + text + " [" + retweets.+("]")
 }
 
 /**
@@ -41,12 +44,12 @@ abstract class TweetSet {
     * Question: Can we implment this method here, or should it remain abstract
     * and be implemented in the subclasses?
     */
-  def filter(p: Tweet => Boolean): TweetSet = filterAcc(p, new Empty)
+  def filter(p: Function1[Tweet, Boolean]): TweetSet = filterAcc(p, new Empty)
 
   /**
     * This is a helper method for `filter` that propagetes the accumulated tweets.
     */
-  def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet
+  def filterAcc(p: Function1[Tweet, Boolean], acc: TweetSet): TweetSet
 
   /**
     * Returns a new `TweetSet` that is the union of `TweetSet`s `this` and `that`.
@@ -65,7 +68,7 @@ abstract class TweetSet {
     * Question: Should we implment this method here, or should it remain abstract
     * and be implemented in the subclasses?
     */
-  def mostRetweeted: Tweet = ???
+  def mostRetweeted: Tweet
 
   /**
     * Returns a list containing all tweets of this set, sorted by retweet count
@@ -103,12 +106,14 @@ abstract class TweetSet {
   /**
     * This method takes a function and applies it to every element in the set.
     */
-  def foreach(f: Tweet => Unit): Unit
+  def foreach(f: Function1[Tweet, Unit]): Unit
 }
 
 class Empty extends TweetSet {
 
-  def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = acc
+  def mostRetweeted: Tweet = throw new java.util.NoSuchElementException
+
+  def filterAcc(p: Function1[Tweet, Boolean], acc: TweetSet): TweetSet = acc
 
   /**
     * The following methods are already implemented
@@ -120,13 +125,28 @@ class Empty extends TweetSet {
 
   def remove(tweet: Tweet): TweetSet = this
 
-  def foreach(f: Tweet => Unit): Unit = ()
+  def foreach(f: Function1[Tweet, Unit]): Unit = ()
 }
 
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
 
-  def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = {
-    def acc2 = if (p(elem)) acc.incl(elem) else acc
+  private def robustMostRetweetedDescent(aTweetSet: TweetSet, currMax: Tweet): Tweet = {
+    try
+      aTweetSet.mostRetweeted
+    catch {
+      case nsee: java.util.NoSuchElementException => currMax
+    }
+  }
+
+  def mostRetweeted: Tweet = {
+    def maxLeft = robustMostRetweetedDescent(left, elem)
+    def maxRigt = robustMostRetweetedDescent(right, elem)
+
+    maxLeft.morePopular(maxRigt)
+  }
+
+  def filterAcc(p: Function1[Tweet, Boolean], acc: TweetSet): TweetSet = {
+    def acc2 = if (p.apply(elem)) acc.incl(elem) else acc
     def acc3 = left.filterAcc(p, acc2)
     right.filterAcc(p, acc3)
   }
@@ -152,8 +172,8 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     else if (elem.text < tw.text) new NonEmpty(elem, left, right.remove(tw))
     else left.union(right)
 
-  def foreach(f: Tweet => Unit): Unit = {
-    f(elem)
+  def foreach(f: Function1[Tweet, Unit]): Unit = {
+    f.apply(elem)
     left.foreach(f)
     right.foreach(f)
   }
@@ -166,9 +186,9 @@ trait TweetList {
 
   def isEmpty: Boolean
 
-  def foreach(f: Tweet => Unit): Unit =
+  def foreach(f: Function1[Tweet, Unit]): Unit =
     if (!isEmpty) {
-      f(head)
+      f.apply(head)
       tail.foreach(f)
     }
 }
@@ -187,8 +207,8 @@ class Cons(val head: Tweet, val tail: TweetList) extends TweetList {
 
 
 object GoogleVsApple {
-  val google = List("android", "Android", "galaxy", "Galaxy", "nexus", "Nexus")
-  val apple = List("ios", "iOS", "iphone", "iPhone", "ipad", "iPad")
+  val google = List.apply("android", "Android", "galaxy", "Galaxy", "nexus", "Nexus")
+  val apple = List.apply("ios", "iOS", "iphone", "iPhone", "ipad", "iPad")
 
   lazy val googleTweets: TweetSet = ???
   lazy val appleTweets: TweetSet = ???

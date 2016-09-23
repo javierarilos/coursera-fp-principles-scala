@@ -27,6 +27,34 @@ class TweetSetSuite extends FunSuite {
 
   def size(set: TweetSet): Int = asSet(set).size
 
+  test("mostRetweeted of set6 has 120 retwets") {
+    new TestSets {
+      val set6 = set5.incl(new Tweet("h", "hbody", 120))
+
+      assert(set6.mostRetweeted.retweets == 120)
+    }
+  }
+
+  test("mostRetweeted of set5 has 20 retwets") {
+    new TestSets {
+      def set2MostRetweeted = set5.mostRetweeted
+      assert(set2MostRetweeted.retweets == 20)
+    }
+  }
+
+  test("mostRetweeted of set4c has 20 retwets") {
+    new TestSets {
+      def set2MostRetweeted = set4c.mostRetweeted
+      assert(set2MostRetweeted.retweets == 20)
+    }
+  }
+  test("mostRetweeted of set2 has 20 retwets") {
+    new TestSets {
+      def set2MostRetweeted = set2.mostRetweeted
+      assert(set2MostRetweeted.retweets == 20)
+    }
+  }
+
   test("filter: on empty set") {
     new TestSets {
       assert(size(set1.filter(tw => tw.user == "a")) === 0)
