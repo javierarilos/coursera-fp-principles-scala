@@ -79,7 +79,30 @@ abstract class TweetSet {
     * Question: Should we implment this method here, or should it remain abstract
     * and be implemented in the subclasses?
     */
-  def descendingByRetweet: TweetList = ???
+  def descendingByRetweet: TweetList = {
+    try {
+      def mostPopular = mostRetweeted
+      new Cons(mostPopular, remove(mostPopular).descendingByRetweet)
+    } catch {
+      case nsee: java.util.NoSuchElementException => Nil
+    }
+  }
+
+  /**
+    * same as descendingByRetweet but ordered from less to more popular
+    * uses tail recursion
+    */
+  def ascendingByRetweet: TweetList = {
+    def loop(aTweetSet: TweetSet, acc: TweetList): TweetList = {
+      try {
+        def mostPopular = aTweetSet.mostRetweeted
+        loop(aTweetSet.remove(mostPopular), new Cons(mostPopular, acc))
+      } catch {
+        case nsee: java.util.NoSuchElementException => acc
+      }
+    }
+    loop(this, Nil)
+  }
 
   /**
     * The following methods are already implemented
@@ -191,6 +214,7 @@ trait TweetList {
       f.apply(head)
       tail.foreach(f)
     }
+
 }
 
 object Nil extends TweetList {
@@ -199,10 +223,17 @@ object Nil extends TweetList {
   def tail = throw new java.util.NoSuchElementException("tail of EmptyList")
 
   def isEmpty = true
+
+  override def toString: String = "Nil\n"
+
+
 }
 
 class Cons(val head: Tweet, val tail: TweetList) extends TweetList {
   def isEmpty = false
+
+  override def toString: String = head.toString + ", " + tail.toString
+
 }
 
 
