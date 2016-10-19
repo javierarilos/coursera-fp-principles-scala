@@ -134,18 +134,26 @@ object Huffman {
     * the example invocation. Also define the return type of the `until` function.
     *  - try to find sensible parameter names for `xxx`, `yyy` and `zzz`.
     */
-  def until(xxx: ???, yyy: ???)(zzz: ???): ??? = ???
-
+  def until(condition: (List[CodeTree]) => Boolean, reduce: (List[CodeTree]) => List[CodeTree])(aList: List[CodeTree]): List[CodeTree] = {
+    condition(aList) match {
+        case true => aList
+        case false => until(condition, reduce)(aList)
+    }
+  }
   /**
     * This function creates a code tree which is optimal to encode the text `chars`.
     *
     * The parameter `chars` is an arbitrary text. This function extracts the character
     * frequencies from that text and creates a code tree based on them.
     */
-  def createCodeTree(chars: List[Char]): CodeTree = ???
+  def createCodeTree(chars: List[Char]): CodeTree = {
+    def freqs = times(chars)
+    def leafs = makeOrderedLeafList(freqs)
+    until(singleton, combine)(leafs)(0)
+  }
 
 
-  // Part 3: Decoding
+  // Part 3: DecodingNil
 
   type Bit = Int
 
@@ -153,7 +161,34 @@ object Huffman {
     * This function decodes the bit sequence `bits` using the code tree `tree` and returns
     * the resulting list of characters.
     */
-  def decode(tree: CodeTree, bits: List[Bit]): List[Char] = ???
+  def decode(tree: CodeTree, bits: List[Bit]): List[Char] = {
+    def decodeChar(tree: CodeTree, bits: List[Bit]): (Char, List[Bit]) = {
+      (tree, bits) match {
+          case (Leaf(char, _), bits) =>
+            (char, bits)
+          case (Fork(left, _, chars, _), 0 :: tail) =>
+            decodeChar(left, tail)
+          case (Fork(_, right, _, _), 1 :: tail) =>
+            decodeChar(right, tail)
+      }
+    }
+
+    def isEmpty[T](l: List[T]): Boolean = l.length == 0
+
+    def decodeLoop(tree: CodeTree, bits: List[Bit], acc: List[Char]): List[Char] = {
+      println("decodeLoop:"+bits+" acc:"+acc)
+      bits match {
+          case Nil =>
+            acc
+          case nonEmpty => {
+            val next: (Char, List[Bit]) = decodeChar(tree, bits)
+            decodeLoop(tree, next._2, acc :+ next._1)
+          }
+      }
+    }
+
+    decodeLoop(tree, bits, List[Char]())
+  }
 
   /**
     * A Huffman coding tree for the French language.
