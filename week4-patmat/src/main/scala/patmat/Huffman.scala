@@ -211,11 +211,28 @@ object Huffman {
 
   // Part 4a: Encoding using Huffman tree
 
+  def encodeChar(tree: CodeTree)(char: Char): List[Bit] = {
+    def encodeCharLoop(tree: CodeTree)(acc: List[Bit], char: Char): List[Bit] = {
+      tree match {
+        case codeTree if ! chars(codeTree).contains(char) => throw new NoSuchElementException("char not in tree chars")
+        case Leaf(leafChar, _) if char == leafChar => acc
+        case Fork(left, _, _, _) if chars(left).contains(char) => encodeCharLoop(left)(0 :: acc, char)
+        case Fork(_, right, _, _) if chars(right).contains(char) => encodeCharLoop(right)(1 :: acc, char)
+      }
+    }
+    encodeCharLoop(tree)(List[Bit](), char)
+  }
+
   /**
     * This function encodes `text` using the code tree `tree`
     * into a sequence of bits.
     */
-  def encode(tree: CodeTree)(text: List[Char]): List[Bit] = ???
+  def encode(tree: CodeTree)(text: List[Char]): List[Bit] = {
+    text match {
+      case Nil => List[Bit]()
+      case char :: tail => encodeChar(tree)(char) ++ encode(tree)(tail)
+    }
+  }
 
   // Part 4b: Encoding using code table
 
